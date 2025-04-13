@@ -283,7 +283,7 @@ public class Game {
 	}
 
 	// 초기화
-	private static void init_player(String name) {
+	private static void init_hero(String name) {
 		hero_name = name;
 
 		Random hero_rng = new Random((long) hero_name.chars().sum());
@@ -302,11 +302,11 @@ public class Game {
 		hero_defense = 20 - hero_power;
 	}
 
-	private static void init_player() {
+	private static void init_hero() {
 		println("환영합니다!\n");
 		print("캐릭터의 이름을 정해주세요: ");
 
-		init_player(SCANNER.next());
+		init_hero(SCANNER.next());
 
 		println("안녕하세요, " + hero_name + "님.\n");
 		heroStatus_show(false);
@@ -423,7 +423,7 @@ public class Game {
 
 	private static void hero_killed() {
 		println(monster_name + "에게 죽었습니다.");
-		init_player(hero_name);
+		init_hero(hero_name);
 		println("모든 레벨과 경험치, 스텟, 포션 효과 등을 잃었습니다.");
 
 		println("[죽은 자리에서 부활합니다.]");
@@ -646,8 +646,8 @@ public class Game {
 		return rendered_visible;
 	}
 
-	private static void display_map(String[] map, int[] player_position, int direction) {
-		char player_icon = switch (direction % 4) {
+	private static void display_map(String[] map, int[] hero_position, int direction) {
+		char hero_icon = switch (direction % 4) {
 		case 0 -> '↑';
 		case 1 -> '→';
 		case 2 -> '↓';
@@ -658,10 +658,10 @@ public class Game {
 		System.out.println("지도\n#:벽 -:길 P:상점 S:출구 G:입구 W:너구리 X:살퀭이 Y:뱀 Z:곰 ↑→↓←:플레이어");
 
 		for (int y = 0; y < map.length; y++) {
-			if (y == player_position[1]) {
+			if (y == hero_position[1]) {
 				String row = map[y];
 				char[] chars = row.toCharArray();
-				chars[player_position[0]] = player_icon;
+				chars[hero_position[0]] = hero_icon;
 				System.out.println(new String(chars));
 			} else {
 				System.out.println(map[y]);
@@ -831,7 +831,7 @@ public class Game {
 	}
 
 	public static void main(String[] args) {
-		init_player();
+		init_hero();
 		hero_money = 10000;
 		wander_map_prompt(TOWN_MAP_STARTING_POINT, 3, TOWN_MAP);
 	}
