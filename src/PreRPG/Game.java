@@ -442,7 +442,7 @@ public class Game {
 			return;
 		}
 
-		if (damage > get_damage(hero_power, 1.0, 0)) {
+		if (damage > get_damage(monster_power, 1.0, 0)) {
 			print("[크리티컬] ");
 		}
 		println(damage + "의 피해를 입었습니다.");
