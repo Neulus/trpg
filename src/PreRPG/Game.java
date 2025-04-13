@@ -832,7 +832,6 @@ public class Game {
 
 	public static void main(String[] args) {
 		init_hero();
-		hero_money = 10000;
 		wander_map_prompt(TOWN_MAP_STARTING_POINT, 3, TOWN_MAP);
 	}
 }
