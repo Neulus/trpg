@@ -40,8 +40,8 @@ public class Game {
 	static int monster_level, monster_power, monster_hp, monster_max_hp, monster_defense, monster_mp,
 			monster_experience, monster_money;
 
-	static final String[] potion_names = { "힘 증가 포션", "방어력 증가 포션", "HP 증가 포션", "MP 증가 포션" };
-	static final int[] potion_prices = { 150, 150, 25, 25 };
+	static final String[] potion_names = { "힘 증가 포션", "방어력 증가 포션", "경험치 포션", "HP 증가 포션", "MP 증가 포션" };
+	static final int[] potion_prices = { 150, 150, 100, 25, 25 };
 
 	// utility
 	private static void sleep(int ms) {
@@ -187,20 +187,22 @@ public class Game {
 				effects.add(i);
 			}
 		}
-
-		if (available_portions.isEmpty()) {
-			println("살 수 있는 포션이 없습니다.");
-			print_splitter(SPLITTER_LENGTH);
-			return;
-		}
+		available_portions.add("나가기");
+		effects.add(-1);
 
 		println("현재 돈: " + render_heroStatus("돈") + "\n");
 
-		int selected = selection_prompt(available_portions.toArray(new String[0]), "구매할 포션을 선택하세요");
+		int selected = selection_prompt(available_portions.toArray(new String[0]), "");
 		int index = effects.get(selected);
+
+		if (index == -1) // not buying anything
+			return;
+
 		int price = potion_prices[index];
 
 		hero_money -= price;
+		println(potion_names[index] + "을(를) 구매했습니다!");
+		println(price + "원 사용했습니다. 남은 돈: " + render_heroStatus("돈"));
 
 		switch (index) {
 		case 0 -> {
@@ -212,17 +214,21 @@ public class Game {
 			println("방어력이 3 증가했습니다!\n현재 방어력: " + render_heroStatus("방어력"));
 		}
 		case 2 -> {
+			hero_experience += 50;
+			println("경험치가 50 증가했습니다!");
+			check_level_up();
+			println("현재 경험치: " + render_heroStatus("경험치"));
+		}
+		case 3 -> {
 			hero_hp += 50;
 			println("체력이 50 증가했습니다! (임시)\n현재 체력: " + render_heroStatus("체력"));
 		}
-		case 3 -> {
+		case 4 -> {
 			hero_mp += 50;
 			println("마나가 50 증가했습니다! (임시)\n현재 마나: " + render_heroStatus("마나"));
 		}
 		}
 
-		println(potion_names[index] + "을(를) 구매했습니다!");
-		println(price + "원 사용했습니다. 남은 돈: " + render_heroStatus("돈"));
 		print_splitter(SPLITTER_LENGTH);
 	}
 
@@ -259,6 +265,24 @@ public class Game {
 		}
 	}
 
+	private static void check_level_up() {
+		if (hero_experience >= get_required_experience(hero_level)) {
+			hero_level++;
+			println("레벨 업! " + (hero_level - 1) + " -> " + hero_level);
+			hero_money += get_reward_for_level_up(hero_level);
+			println("힘 " + hero_power + " -> " + (int) ((hero_power + 1) * 1.3));
+			println("방어력 " + hero_defense + " -> " + (int) ((hero_defense + 1) * 1.3));
+			println("레벨 업 기념으로 돈이 " + get_reward_for_level_up(hero_level) + "원 증가하여 " + render_heroStatus("돈")
+					+ "이 되었습니다.");
+			hero_power = (int) ((hero_power + 1) * 1.3);
+			hero_defense = (int) ((hero_defense + 1) * 1.3);
+
+			hero_hp = Math.max(hero_hp, get_max_hp(hero_level));
+			hero_mp = Math.max(hero_mp, get_max_mp(hero_level));
+		}
+	}
+
+	// 초기화
 	private static void init_player(String name) {
 		hero_name = name;
 
@@ -278,7 +302,6 @@ public class Game {
 		hero_defense = 20 - hero_power;
 	}
 
-	// 초기화
 	private static void init_player() {
 		println("환영합니다!\n");
 		print("캐릭터의 이름을 정해주세요: ");
@@ -440,20 +463,7 @@ public class Game {
 		hero_money += monster_money;
 		println("\n" + monster_name + "이(가) 가지고 있던 " + render_monsterStatus("돈") + "을 강탈했습니다.");
 
-		if (hero_experience >= get_required_experience(hero_level)) {
-			hero_level++;
-			println("레벨 업! " + (hero_level - 1) + " -> " + hero_level);
-			hero_money += get_reward_for_level_up(hero_level);
-			println("힘 " + hero_power + " -> " + (int) ((hero_power + 1) * 1.3));
-			println("방어력 " + hero_defense + " -> " + (int) ((hero_defense + 1) * 1.3));
-			println("레벨 업 기념으로 돈이 " + get_reward_for_level_up(hero_level) + "원 증가하여 " + render_heroStatus("돈")
-					+ "이 되었습니다.");
-			hero_power = (int) ((hero_power + 1) * 1.3);
-			hero_defense = (int) ((hero_defense + 1) * 1.3);
-
-			hero_hp = Math.max(hero_hp, get_max_hp(hero_level));
-			hero_mp = Math.max(hero_mp, get_max_mp(hero_level));
-		}
+		check_level_up();
 
 		println("\n현재 경험치 " + render_heroStatus("경험치"));
 		print_splitter(SPLITTER_LENGTH);
@@ -822,6 +832,7 @@ public class Game {
 
 	public static void main(String[] args) {
 		init_player();
+		hero_money = 10000;
 		wander_map_prompt(TOWN_MAP_STARTING_POINT, 3, TOWN_MAP);
 	}
 }
